@@ -4,6 +4,8 @@ import '../models/category.dart';
 import '../models/meal_summary.dart';
 import '../services/meal_api_service.dart';
 import '../widgets/meal_grid_item.dart';
+import '../services/favorites_service.dart';
+import 'favorites_screen.dart';
 import 'meal_detail_screen.dart';
 
 class MealsByCategoryScreen extends StatefulWidget {
@@ -106,7 +108,20 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
     final displayMeals = _isSearching ? _searchResults : _meals;
 
     return Scaffold(
-      appBar: AppBar(title: Text(category.name)),
+      appBar: AppBar(
+        title: Text(category.name),
+        actions: [
+          IconButton(
+            tooltip: 'Favorites',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+              );
+            },
+            icon: const Icon(Icons.favorite),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Hero(
@@ -140,6 +155,8 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
     );
   }
 
+  final favoritesService = FavoritesService();
+
   Widget _buildBody(List<MealSummary> displayMeals) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -158,24 +175,35 @@ class _MealsByCategoryScreenState extends State<MealsByCategoryScreen> {
       return const Center(child: Text('No meals found'));
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      itemCount: displayMeals.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 0.75,
-      ),
-      itemBuilder: (context, index) {
-        final meal = displayMeals[index];
-        return MealGridItem(
-          meal: meal,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => MealDetailScreen(mealId: meal.id),
-              ),
+    return ValueListenableBuilder<List<MealSummary>>(
+      valueListenable: favoritesService.favorites,
+      builder: (context, favorites, _) {
+        return GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          itemCount: displayMeals.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 0.95,
+          ),
+          itemBuilder: (context, index) {
+            final meal = displayMeals[index];
+            final isFav = favoritesService.isFavorite(meal);
+
+            return MealGridItem(
+              meal: meal,
+              isFavorite: isFav,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => MealDetailScreen(mealId: meal.id),
+                  ),
+                );
+              },
+              onToggleFavorite: () {
+                favoritesService.toggleFavorite(meal);
+              },
             );
           },
         );

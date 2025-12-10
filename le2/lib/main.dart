@@ -1,12 +1,38 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:le2/services/notification_service.dart';
 import 'screens/category_list_screen.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MealApp());
 }
 
-class MealApp extends StatelessWidget {
+class MealApp extends StatefulWidget {
   const MealApp({super.key});
+
+  @override
+  State<MealApp> createState() => _MealAppState();
+}
+
+class _MealAppState extends State<MealApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NotificationService().init(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

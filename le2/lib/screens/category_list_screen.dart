@@ -5,6 +5,7 @@ import '../services/meal_api_service.dart';
 import '../widgets/category_card.dart';
 import 'meals_by_category_screen.dart';
 import 'meal_detail_screen.dart';
+import 'favorites_screen.dart';
 import '../models/meal_detail.dart';
 
 class CategoryListScreen extends StatefulWidget {
@@ -109,6 +110,15 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         titleSpacing: 16,
         title: const Text('Meal Explorer'),
         actions: [
+          IconButton(
+            tooltip: 'Favorites',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+              );
+            },
+            icon: const Icon(Icons.favorite),
+          ),
           TextButton.icon(
             onPressed: _openRandomMeal,
             icon: const Icon(Icons.casino),

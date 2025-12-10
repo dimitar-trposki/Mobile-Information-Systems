@@ -4,8 +4,16 @@ import '../models/meal_summary.dart';
 class MealGridItem extends StatelessWidget {
   final MealSummary meal;
   final VoidCallback onTap;
+  final bool isFavorite;
+  final VoidCallback? onToggleFavorite;
 
-  const MealGridItem({super.key, required this.meal, required this.onTap});
+  const MealGridItem({
+    super.key,
+    required this.meal,
+    required this.onTap,
+    this.isFavorite = false,
+    this.onToggleFavorite,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +27,33 @@ class MealGridItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Hero(
-                tag: 'meal-image-${meal.id}',
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(18),
+              child: Stack(
+                children: [
+                  Hero(
+                    tag: 'meal-image-${meal.id}',
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(18),
+                      ),
+                      child: Image.network(
+                        meal.thumbnail,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
                   ),
-                  child: Image.network(meal.thumbnail, fit: BoxFit.cover),
-                ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                      ),
+                      color: Colors.white,
+                      onPressed: onToggleFavorite,
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
